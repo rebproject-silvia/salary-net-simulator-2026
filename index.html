@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Prototipo di simulatore dello stipendio netto 2026 per un dipendente privato a tempo indeterminato residente a Milano." />
+  <title>Simulatore stipendio netto 2026 — V0.9 Submission Candidate</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-meta">
+        <p class="eyebrow">PROTOTIPO · ANNO FISCALE 2026</p>
+        <span class="verification-badge"><span id="ruleset-status">Ruleset approvato: 31/08/2026</span></span>
+      </div>
+      <div class="hero-title-row"><h1>Calcola il tuo stipendio<br><span class="hero-netto">n<span class="euro-letter">€</span>tto</span></h1><div class="hero-mark" aria-hidden="true"><span>RAL</span><b>→</b><span>NETTO</span></div></div>
+      <p class="lead">
+        Inserisci la <strong>Retribuzione Annua Lorda</strong> e ottieni una stima trasparente
+        del netto annuale, del netto medio per mensilità e delle principali trattenute.
+      </p>
+    </header>
+
+
+    
+<section class="profile-summary" aria-labelledby="profile-title">
+  <div class="profile-summary-main">
+    <div>
+      <p class="step">CASO STANDARD DEL PROTOTIPO</p>
+      <h2 id="profile-title">Dipendente privato · tempo indeterminato · Milano · 2026</h2>
+    </div>
+    <span class="scope-status">Caso coperto ✓</span>
+  </div>
+  <p class="profile-summary-note">Unico reddito da lavoro dipendente · nessuna agevolazione particolare.</p><p class="profile-summary-fixed">Profilo fisso per questa demo.</p>
+  <details class="profile-limits">
+    <summary>Cosa non include questa versione</summary>
+    <div class="details-content">
+      <ul>
+        <li>Contratto collettivo specifico e fondi di categoria.</li>
+        <li>Premi, welfare, fringe benefit e straordinari.</li>
+        <li>Familiari a carico o altre detrazioni personali.</li>
+        <li>Altri redditi, conguagli o eventi infra-annuali.</li>
+        <li>Ricostruzione del singolo cedolino.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+
+    <section class="card calculator-card" aria-labelledby="input-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">01</p>
+          <h2 id="input-title">Dati per il calcolo</h2>
+        </div>
+      </div>
+
+      <form id="salary-form" novalidate>
+        <div class="field">
+          <label for="ral">Retribuzione Annua Lorda (€)</label>
+          <div class="input-wrap">
+            <span aria-hidden="true">€</span>
+            <input
+              id="ral"
+              name="ral"
+              type="number"
+              min="5000"
+              max="50000"
+              step="0.01"
+              value="30000"
+              inputmode="decimal"
+              required
+              aria-describedby="ral-help"
+            />
+          </div>
+          <p class="help" id="ral-help">Per questa versione: da 5.000 € a 50.000 €.</p>
+        </div>
+
+        <fieldset class="field">
+          <legend>Numero di mensilità</legend>
+          <div class="segmented">
+            <label>
+              <input type="radio" name="months" value="13" checked />
+              <span>13 mensilità</span>
+            </label>
+            <label>
+              <input type="radio" name="months" value="14" />
+              <span>14 mensilità</span>
+            </label>
+          </div>
+          <p class="help">
+            La scelta modifica il <strong>netto medio per mensilità</strong>, non il netto annuale stimato.
+          </p>
+        </fieldset>
+
+        <p class="error" id="form-error" role="alert" hidden></p>
+
+        <button class="primary-button" type="submit">Calcola</button>
+      </form>
+    </section>
+
+    <section id="results" class="results" aria-live="polite" hidden>
+      <div class="results-toolbar">
+        <div>
+          <p class="step">02</p>
+          <h2>Risultato della simulazione</h2>
+        </div>
+        <div class="toolbar-actions">
+          <button class="secondary-button" id="edit-data" type="button">Modifica i dati</button>
+          <button class="secondary-button" id="copy-summary" type="button">Copia riepilogo</button>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <article class="result-card primary-result">
+          <p>Netto annuo stimato</p>
+          <strong id="net-annual">—</strong>
+          <small>Quanto resta nell'anno dopo contributi e imposte stimate.</small>
+        </article>
+
+        <article class="result-card">
+          <p>Netto medio per mensilità</p>
+          <strong id="net-monthly">—</strong>
+          <small id="months-caption">Ripartizione matematica su 13 mensilità.</small>
+        </article>
+
+        <article class="result-card">
+          <p>Contributi del lavoratore</p>
+          <strong id="contributions-total">—</strong>
+          <small>Stima della contribuzione previdenziale a carico del dipendente.</small>
+        </article>
+
+        <article class="result-card">
+          <p>Imposte totali</p>
+          <strong id="taxes-total">—</strong>
+          <small>IRPEF netta + addizionale regionale + addizionale comunale.</small>
+        </article>
+      </div>
+
+      <section class="money-flow" aria-labelledby="flow-title">
+        <div class="money-flow-head">
+          <div><p class="step">DOVE VA LA RAL</p><h3 id="flow-title">Un colpo d’occhio, poi il dettaglio</h3></div>
+          <span id="flow-effective-rate" class="flow-rate">—</span>
+        </div>
+        <div class="flow-bar" role="img" aria-label="Ripartizione della RAL tra netto, contributi e imposte">
+          <span id="flow-net" class="flow-segment flow-net"></span>
+          <span id="flow-contrib" class="flow-segment flow-contrib"></span>
+          <span id="flow-tax" class="flow-segment flow-tax"></span>
+        </div>
+        <div class="flow-legend">
+          <span><i class="dot dot-net"></i><span id="flow-net-name">Netto</span> <strong id="flow-net-label">—</strong></span>
+          <span><i class="dot dot-contrib"></i>Contributi <strong id="flow-contrib-label">—</strong></span>
+          <span><i class="dot dot-tax"></i>Imposte <strong id="flow-tax-label">—</strong></span>
+        </div>
+        <div id="flow-benefits" class="flow-benefits" hidden>
+          <span>Benefici fiscali aggiuntivi <strong id="flow-benefits-value">—</strong></span>
+          <span>Netto finale <strong id="flow-benefits-final">—</strong></span>
+        </div>
+      </section>
+
+      <section class="comparison-panel" aria-labelledby="compare-title">
+        <div>
+          <p class="step">CONFRONTO RAPIDO</p>
+          <h3 id="compare-title">Stesso netto annuo, distribuzione diversa</h3>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-box">
+            <span>13 mensilità</span>
+            <strong id="compare-13">—</strong>
+            <small>netto medio per mensilità</small>
+          </div>
+          <div class="compare-arrow" aria-hidden="true">↔</div>
+          <div class="compare-box">
+            <span>14 mensilità</span>
+            <strong id="compare-14">—</strong>
+            <small>netto medio per mensilità</small>
+          </div>
+        </div>
+        <p class="compare-note">Il confronto mostra una media matematica. Le mensilità aggiuntive possono avere trattenute diverse da una mensilità ordinaria.</p>
+      </section>
+
+
+      <section class="threshold-panel" id="threshold-panel" aria-labelledby="threshold-title" hidden>
+        <div class="threshold-heading">
+          <div>
+            <p class="step">SOGLIE SENSIBILI</p>
+            <h3 id="threshold-title">Il netto non cresce sempre in linea retta</h3>
+          </div>
+          <span class="threshold-chip" id="threshold-chip">Controllo automatico</span>
+        </div>
+
+        <p class="threshold-summary" id="threshold-summary">—</p>
+
+        <div class="threshold-comparison" id="threshold-comparison">
+          <article>
+            <span>Appena sotto la soglia</span>
+            <strong id="threshold-gross-below">—</strong>
+            <small>Retribuzione Annua Lorda</small>
+            <dl>
+              <div><dt>Imponibile</dt><dd id="threshold-taxable-below">—</dd></div>
+              <div><dt>Addizionale Milano</dt><dd id="threshold-tax-below">—</dd></div>
+              <div><dt>Netto annuo</dt><dd id="threshold-net-below">—</dd></div>
+            </dl>
+          </article>
+
+          <div class="threshold-vs" aria-hidden="true">→</div>
+
+          <article class="threshold-after">
+            <span>Appena sopra la soglia</span>
+            <strong id="threshold-gross-above">—</strong>
+            <small>Retribuzione Annua Lorda</small>
+            <dl>
+              <div><dt>Imponibile</dt><dd id="threshold-taxable-above">—</dd></div>
+              <div><dt>Addizionale Milano</dt><dd id="threshold-tax-above">—</dd></div>
+              <div><dt>Netto annuo</dt><dd id="threshold-net-above">—</dd></div>
+            </dl>
+          </article>
+        </div>
+
+        <div class="threshold-impact">
+          <strong id="threshold-impact-title">—</strong>
+          <p id="threshold-impact-text">—</p>
+        </div>
+
+        <div class="threshold-actions">
+          <button type="button" class="secondary-button" id="try-threshold">Prova il caso soglia</button>
+        </div>
+
+        <p class="threshold-disclaimer">
+          Questo confronto evidenzia una discontinuità del modello fiscale, non è un consiglio retributivo o fiscale.
+          Il risultato reale dipende dai dati effettivi del lavoratore e del cedolino.
+        </p>
+      </section>
+
+
+      <div class="notice">
+        <strong>Netto medio ≠ singolo cedolino.</strong>
+        Tredicesima e quattordicesima possono avere un netto diverso dalle mensilità ordinarie.
+        Il simulatore restituisce una stima annuale e una media, non replica una specifica busta paga.
+      </div>
+
+      <section class="card breakdown-card" aria-labelledby="breakdown-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="step">03</p>
+            <h2 id="breakdown-title">Come si arriva al risultato</h2>
+          </div>
+        </div>
+
+        <div class="breakdown" id="breakdown">
+          <div><span>Retribuzione Annua Lorda</span><strong id="b-gross">—</strong></div>
+          <div class="minus"><span>Contributi previdenziali</span><strong id="b-contrib">—</strong></div>
+          <div class="subtotal"><span>Imponibile fiscale stimato</span><strong id="b-taxable">—</strong></div>
+          <div><span>IRPEF lorda</span><strong id="b-irpef-gross">—</strong></div>
+          <div class="plus"><span>Detrazione lavoro dipendente</span><strong id="b-work-deduction">—</strong></div>
+          <div class="plus" id="extra-deduction-row"><span>Ulteriore detrazione lavoro</span><strong id="b-extra-deduction">—</strong></div>
+          <div class="minus"><span>IRPEF netta stimata</span><strong id="b-irpef-net">—</strong></div>
+          <div class="minus"><span>Addizionale regionale Lombardia</span><strong id="b-regional">—</strong></div>
+          <div class="minus"><span>Addizionale comunale Milano</span><strong id="b-municipal">—</strong></div>
+          <div class="plus" id="wedge-bonus-row"><span>Bonus per riduzione del cuneo fiscale</span><strong id="b-wedge-bonus">—</strong></div>
+          <div class="plus" id="treatment-row"><span>Trattamento integrativo</span><strong id="b-treatment">—</strong></div>
+          <div class="total"><span>Netto annuo stimato</span><strong id="b-net">—</strong></div>
+        </div>
+      </section>
+
+      <section class="card audit-card" aria-labelledby="audit-title">
+        <div class="section-heading compact">
+          <div>
+            <p class="step">04</p>
+            <h2 id="audit-title">Spiegami questo risultato</h2>
+          </div>
+        </div>
+        <p class="explain-intro">Formula, valori usati e fonte: il numero non è una scatola nera.</p>
+        <div class="audit-list">
+          <details class="audit-item">
+            <summary><span>Contributi previdenziali</span><strong id="a-contrib">—</strong></summary>
+            <div class="audit-body">
+              <p id="formula-contrib">—</p>
+              <p class="source-line"><strong>Regola:</strong> <span id="contrib-rule-text">—</span><a href="https://www.inps.it/it/it/inps-comunica/atti/circolari-messaggi-e-normativa/dettaglio.circolari-e-messaggi.2026.01.circolare-numero-6-del-30-01-2026_15151.html" target="_blank" rel="noopener">Fonte INPS</a></p>
+            </div>
+          </details>
+          <details class="audit-item">
+            <summary><span>Imponibile fiscale</span><strong id="a-taxable">—</strong></summary>
+            <div class="audit-body"><p id="formula-taxable">—</p></div>
+          </details>
+          <details class="audit-item">
+            <summary><span>IRPEF lorda</span><strong id="a-irpef-gross">—</strong></summary>
+            <div class="audit-body">
+              <p id="formula-irpef">—</p>
+              <p class="source-line"><strong>Scaglioni attivi:</strong> <span id="irpef-rule-text">—</span> <a href="https://temi.camera.it/leg19/temi/19_tl18_irpef" target="_blank" rel="noopener">Fonte Camera dei Deputati</a></p>
+            </div>
+          </details>
+          <details class="audit-item">
+            <summary><span>Detrazioni da lavoro</span><strong id="a-deductions">—</strong></summary>
+            <div class="audit-body">
+              <p id="formula-deductions">—</p>
+              <p class="source-line">Le detrazioni cambiano in funzione del reddito. <a href="https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-lavoro-dipendente-e-pensioni" target="_blank" rel="noopener">Fonte Agenzia delle Entrate</a></p>
+            </div>
+          </details>
+          <details class="audit-item" id="audit-wedge-bonus" hidden>
+            <summary><span>Bonus riduzione cuneo</span><strong id="a-wedge-bonus">—</strong></summary>
+            <div class="audit-body"><p id="formula-wedge-bonus">—</p></div>
+          </details>
+          <details class="audit-item" id="audit-treatment" hidden>
+            <summary><span>Trattamento integrativo</span><strong id="a-treatment">—</strong></summary>
+            <div class="audit-body"><p id="formula-treatment">—</p></div>
+          </details>
+          <details class="audit-item">
+            <summary><span>Addizionale Lombardia</span><strong id="a-regional">—</strong></summary>
+            <div class="audit-body">
+              <p id="formula-regional">—</p>
+              <p class="source-line">Aliquote regionali progressive. <a href="https://www.regione.lombardia.it/bollo-auto-e-tributi-regionali/red-addizionale-regionale-irpef" target="_blank" rel="noopener">Fonte Regione Lombardia</a></p>
+            </div>
+          </details>
+          <details class="audit-item">
+            <summary><span>Addizionale Milano</span><strong id="a-municipal">—</strong></summary>
+            <div class="audit-body">
+              <p id="formula-municipal">—</p>
+              <p class="source-line"><span id="milan-rule-text">—</span> <a href="https://servizicrm.comune.milano.it/centro-supporto/KA-01737/Esenzioni-addizionale-comunale-IRPEF" target="_blank" rel="noopener">Fonte Comune di Milano</a></p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <div class="accordion-stack">
+        <details class="card">
+          <summary>Perché il cedolino reale può essere diverso?</summary>
+          <div class="details-content">
+            <p>
+              La Retribuzione Annua Lorda non descrive da sola ogni caratteristica di una busta paga.
+              Il contratto collettivo applicato, fondi e contribuzioni specifiche, premi, welfare, giorni
+              effettivamente lavorati, conguagli e modalità di trattenuta delle addizionali possono modificare
+              gli importi dei singoli mesi.
+            </p>
+            <p>
+              Per questo il prototipo distingue il <strong>netto annuo stimato</strong> dal
+              <strong>netto medio per mensilità</strong>. La selezione 13/14 non pretende di ricostruire
+              una specifica tredicesima o quattordicesima.
+            </p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>Fonti e metodologia</summary>
+          <div class="details-content sources">
+            <p>Il motore usa il ruleset approvato indicato nella pagina. Ultimo controllo tecnico delle fonti online: non attestato da questa versione distribuita. La fixture inclusa non documenta una verifica online.</p>
+            <ul>
+              <li><a href="https://temi.camera.it/leg19/temi/19_tl18_irpef" target="_blank" rel="noopener">Camera dei Deputati — aliquote IRPEF e riduzione del cuneo fiscale</a></li>
+              <li><a href="https://www.inps.it/it/it/inps-comunica/atti/circolari-messaggi-e-normativa/dettaglio.circolari-e-messaggi.2026.01.circolare-numero-6-del-30-01-2026_15151.html" target="_blank" rel="noopener">INPS — fascia 2026 per il contributo aggiuntivo dell'1%</a></li>
+              <li><a href="https://www.regione.lombardia.it/bollo-auto-e-tributi-regionali/red-addizionale-regionale-irpef" target="_blank" rel="noopener">Regione Lombardia — addizionale regionale IRPEF</a></li>
+              <li><a href="https://www.comune.milano.it/argomenti/tributi/addizionale-comunale-irpef" target="_blank" rel="noopener">Comune di Milano — addizionale comunale IRPEF</a></li>
+              <li><a href="https://infoprecompilata.agenziaentrate.gov.it/portale/semplificata-mod-lavoro-dipendente-e-pensioni" target="_blank" rel="noopener">Agenzia delle Entrate — lavoro dipendente e riduzione della pressione fiscale</a></li>
+            </ul>
+            <div class="rules-engine-note">
+              <strong>Regole separate dal motore.</strong> Il calcolatore legge aliquote e soglie da un file dati versionato.
+              Il progetto include un controllo tecnico mensile delle fonti ufficiali, esclusivamente review-only.
+              La raggiungibilità di una pagina non costituisce approvazione fiscale. Variazioni o ambiguità rilevate
+              richiedono revisione umana; il watcher non modifica il ruleset approvato.
+              <span id="ruleset-id">Ruleset —</span>
+            </div>
+          </div>
+        </details>
+      </div>
+      <p class="copy-feedback" id="copy-feedback" role="status" hidden>Riepilogo copiato.</p>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-signature">
+        <img src="assets/reb-project-logo.png" alt="REB Project" width="46" height="46" loading="lazy">
+        <p><strong>Built by Silvia Contarelli · REB Project</strong></p>
+      </div>
+      <p class="footer-note">Prototipo tecnico — simulazione indicativa, non consulenza fiscale o del lavoro.</p>
+    </footer>
+  </main>
+
+  <script src="data/rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

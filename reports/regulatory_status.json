@@ -1,0 +1,20 @@
+{
+  "checkedAt": null,
+  "approvedRuleset": "IT-MI-2026.08-b78ba29f",
+  "approvedAt": "2026-08-31",
+  "status": "review_required",
+  "proposals": [],
+  "sources": [],
+  "errors": [
+    "irpef: <urlopen error Rete indisponibile (fixture offline)>",
+    "inps: <urlopen error Rete indisponibile (fixture offline)>",
+    "lombardy: <urlopen error Rete indisponibile (fixture offline)>",
+    "milan: <urlopen error Rete indisponibile (fixture offline)>",
+    "employeeTax: <urlopen error Rete indisponibile (fixture offline)>"
+  ],
+  "policy": "review-only",
+  "fixture": true,
+  "fixtureVersion": "V0.9",
+  "fixtureGeneratedAt": "2026-08-31",
+  "fixtureScenario": "network_unavailable; no live HTTP check"
+}
