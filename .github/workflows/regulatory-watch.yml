@@ -1,0 +1,33 @@
+name: Regulatory Watch
+
+on:
+  schedule:
+    - cron: '15 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Review-only source check
+        id: watch
+        continue-on-error: true
+        run: python scripts/watch_rules.py
+      - name: Upload regulatory report even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regulatory-report
+          path: reports/regulatory_status.json
+      - name: Require manual review when uncertain
+        if: steps.watch.outcome != 'success'
+        run: |
+          echo "Potential regulatory change or ambiguous source. Approved rules were NOT modified."
+          exit 1
