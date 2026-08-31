@@ -1,0 +1,36 @@
+name: Prototype Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate fiscal rules
+        run: python scripts/validate_rules.py
+      - name: Check JSON and browser ruleset equality (read-only)
+        run: node scripts/test_rules_js.cjs
+      - name: Test actual JavaScript engine
+        run: node scripts/test_app_js.cjs
+      - name: Independent Python oracle
+        run: python scripts/test_engine.py
+      - name: Static UI checks
+        run: python scripts/test_ui.py
+      - name: Review-only watcher fixtures
+        run: python -B scripts/test_watch_rules.py
+      - name: JavaScript and Python syntax
+        run: |
+          node --check app.js
+          node --check data/rules.js
+          for script in scripts/*.cjs; do node --check "$script"; done
+          python -c "import ast,pathlib; [ast.parse(p.read_text(encoding='utf-8'),filename=str(p)) for p in pathlib.Path('scripts').glob('*.py')]"
